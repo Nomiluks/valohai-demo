@@ -45,6 +45,17 @@
       - https://valohaidemo.blob.core.windows.net/mnist/five-inverted.png
       - https://valohaidemo.blob.core.windows.net/mnist/five-normal.jpg
 
+- step:
+    name: compare-predictions
+    image: python:3.9
+    command:
+      - pip install numpy valohai-utils
+      - python ./compare_predictions.py
+    inputs:
+      - name: predictions
+      - name: models
+        optional: true
+        
 - pipeline:
     name: preprocess-and-train
     nodes:
