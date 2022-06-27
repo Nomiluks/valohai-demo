@@ -6,14 +6,15 @@
     - python ./preprocess_dataset.py {parameters}
     inputs:
     - name: dataset
-      default: https://valohaidemo.blob.core.windows.net/mnist/mnist.npz
+      # default: https://valohaidemo.blob.core.windows.net/mnist/mnist.npz
+      default: s3://valohai-data-091608907579/data/01G65/01G65GVZE0GDAJZS63CJWQ8B8V/upload/mnist.npz
       optional: false
 
 - step:
     name: train-model
     image: tensorflow/tensorflow:2.6.0
     command:
-    - pip install valohai-utils
+    - pip install -r requirements.txt
     - python train_model.py {parameters}
     parameters:
     - name: epochs
@@ -35,7 +36,7 @@
     name: batch-inference
     image: tensorflow/tensorflow:2.6.0
     command:
-    - pip install pillow valohai-utils
+    - pip install -r requirements.txt
     - python ./batch_inference.py
     inputs:
     - name: model
@@ -49,7 +50,7 @@
     name: compare-predictions
     image: python:3.9
     command:
-      - pip install numpy valohai-utils
+      - pip install -r requirements.txt
       - python ./compare_predictions.py
     inputs:
       - name: predictions
