@@ -31,6 +31,20 @@
       default: https://valohaidemo.blob.core.windows.net/mnist/preprocessed_mnist.npz
       optional: false
 
+- step:
+    name: batch-inference
+    image: tensorflow/tensorflow:2.6.0
+    command:
+    - pip install pillow valohai-utils
+    - python ./batch_inference.py
+    inputs:
+    - name: model
+    - name: images
+      default:
+      - https://valohaidemo.blob.core.windows.net/mnist/four-inverted.png
+      - https://valohaidemo.blob.core.windows.net/mnist/five-inverted.png
+      - https://valohaidemo.blob.core.windows.net/mnist/five-normal.jpg
+
 - pipeline:
     name: preprocess-and-train
     nodes:
@@ -40,5 +54,12 @@
     - name: train
       type: execution
       step: train-model
+      override:
+        inputs:
+          - name: dataset
+    - name: evaluate
+      type: execution
+      step: batch-inference
     edges:
     - [preprocess.output.preprocessed_mnist.npz, train.input.dataset]
+    - [train.output.model*, evaluate.input.model]
