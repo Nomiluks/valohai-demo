@@ -29,7 +29,8 @@
       type: float
     inputs:
     - name: dataset
-      default: https://valohaidemo.blob.core.windows.net/mnist/preprocessed_mnist.npz
+      # default: https://valohaidemo.blob.core.windows.net/mnist/preprocessed_mnist.npz
+      default: s3://valohai-data-091608907579/data/01G65/01G65GVZE0GDAJZS63CJWQ8B8V/upload/preprocessed_mnist.npz
       optional: false
 
 - step:
@@ -75,3 +76,19 @@
     edges:
     - [preprocess.output.preprocessed_mnist.npz, train.input.dataset]
     - [train.output.model*, evaluate.input.model]
+    
+- endpoint:
+    name: greet
+    image: python:3.9
+    port: 8000
+    server-command: python -m wsgiref.simple_server
+
+- endpoint:
+    name: predict-digit
+    description: predict digits from image inputs ("file" parameter)
+    image: tensorflow/tensorflow:2.6.0
+    wsgi: predict:predict
+    files:
+      - name: model
+        description: Model output file from TensorFlow
+        path: model.h5
