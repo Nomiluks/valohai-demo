@@ -76,7 +76,113 @@
     edges:
     - [preprocess.output.preprocessed_mnist.npz, train.input.dataset]
     - [train.output.model*, evaluate.input.model]
-    
+
+- pipeline:
+    name: Three-Trainings Pipeline
+    nodes:
+      - name: preprocess
+        type: execution
+        step: preprocess-dataset
+      - name: train1
+        type: execution
+        step: train-model
+        override:
+          inputs:
+            - name: dataset
+      - name: train2
+        type: execution
+        step: train-model
+        override:
+          inputs:
+            - name: dataset
+      - name: train3
+        type: execution
+        step: train-model
+        override:
+          inputs:
+            - name: dataset
+      - name: evaluate1
+        type: execution
+        step: batch-inference
+      - name: evaluate2
+        type: execution
+        step: batch-inference
+      - name: evaluate3
+        type: execution
+        step: batch-inference
+      - name: find-best-model
+        type: execution
+        step: compare-predictions
+    edges:
+      - [preprocess.output.preprocessed_mnist.npz, train1.input.dataset]
+      - [preprocess.output.preprocessed_mnist.npz, train2.input.dataset]
+      - [preprocess.output.preprocessed_mnist.npz, train3.input.dataset]
+      - [train1.output.model*, evaluate1.input.model]
+      - [train2.output.model*, evaluate2.input.model]
+      - [train3.output.model*, evaluate3.input.model]
+      - [evaluate1.output.*.json, find-best-model.input.predictions]
+      - [evaluate2.output.*.json, find-best-model.input.predictions]
+      - [evaluate3.output.*.json, find-best-model.input.predictions]
+      - [evaluate1.input.model*, find-best-model.input.models]
+      - [evaluate2.input.model*, find-best-model.input.models]
+      - [evaluate3.input.model*, find-best-model.input.models]
+
+- pipeline:
+    name: Three-Trainings Pipeline with deployment
+    nodes:
+      - name: preprocess
+        type: execution
+        step: preprocess-dataset
+      - name: train1
+        type: execution
+        step: train-model
+        override:
+          inputs:
+            - name: dataset
+      - name: train2
+        type: execution
+        step: train-model
+        override:
+          inputs:
+            - name: dataset
+      - name: train3
+        type: execution
+        step: train-model
+        override:
+          inputs:
+            - name: dataset
+      - name: evaluate1
+        type: execution
+        step: batch-inference
+      - name: evaluate2
+        type: execution
+        step: batch-inference
+      - name: evaluate3
+        type: execution
+        step: batch-inference
+      - name: find-best-model
+        type: execution
+        step: compare-predictions
+      - name: deploy
+        type: deployment
+        deployment: deployment-test
+        endpoints:
+          - predict-digit
+    edges:
+      - [preprocess.output.preprocessed_mnist.npz, train1.input.dataset]
+      - [preprocess.output.preprocessed_mnist.npz, train2.input.dataset]
+      - [preprocess.output.preprocessed_mnist.npz, train3.input.dataset]
+      - [train1.output.model*, evaluate1.input.model]
+      - [train2.output.model*, evaluate2.input.model]
+      - [train3.output.model*, evaluate3.input.model]
+      - [evaluate1.output.*.json, find-best-model.input.predictions]
+      - [evaluate2.output.*.json, find-best-model.input.predictions]
+      - [evaluate3.output.*.json, find-best-model.input.predictions]
+      - [evaluate1.input.model*, find-best-model.input.models]
+      - [evaluate2.input.model*, find-best-model.input.models]
+      - [evaluate3.input.model*, find-best-model.input.models]
+      - [find-best-model.output.model*, deploy.file.predict-digit.model]
+
 - endpoint:
     name: greet
     image: python:3.9
